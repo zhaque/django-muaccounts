@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/06/03 01:00:13
+Date: 2009/06/03 01:19:52
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -63,6 +63,10 @@ Table of Contents
   Class has one class attribute, `subdomain_root', which contains root
   for subdomains as in `MUACCOUNTS_ROOT_DOMAIN' setting description,
   always with leading dot.  This attribute should not be written.
+
+  Model defines `get_absolute_url()' method, which returns link to
+  root path of configured domain ([http://domain.root_domain/] if
+  `is_subdomain', [http://domain/] otherwise).
 
   Class defines one custom permission, `can_set_custom_domain', which
   enables setting `is_subdomain' to `True' for the account owner.  If

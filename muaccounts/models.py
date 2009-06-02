@@ -24,6 +24,12 @@ class MUAccount(models.Model):
     def __unicode__(self):
         return self.domain
 
+    def get_absolute_url(self):
+        if self.is_subdomain:
+            return 'http://%s%s/' % (self.domain, self.subdomain_root)
+        else:
+            return 'http://%s/' % self.domain
+
     class Meta:
         permissions = (
             ('can_set_custom_domain', 'Can set custom domain'),
