@@ -1,0 +1,107 @@
+# -*- org -*-
+#+TITLE:     Django Multi-User Accounts
+#+AUTHOR:    Maciej Pasternacki
+#+EMAIL:     maciej@pasternacki.net
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:nil tags:not-in-toc
+
+Django-muaccounts is an application for multi-user accounts within
+a Django project, accessible on separate domains, to use
+in software-as-a-service projects.
+
+* Installation
+  Copy or symlink =muaccounts/= subdirectory to Python path (=setup.py=
+  script for automated installation will be supplied later on). Module
+  contents are available in the =muaccounts= module.
+
+  In order to use application, add =muaccounts= to INSTALLED_APPS in
+  Django project =settings.py= file,
+  =muaccounts.middleware.MUAccountsMiddleware= to MIDDLEWARE_CLASSES
+  after =AuthenticationMiddleware=, and configure application settings
+  described in the next section.
+* Settings
+  Following Django settings are read by the application:
+  - =MUACCOUNTS_ROOT_DOMAIN= - root domain for subdomains (with or
+    without leading dot). If not set, current Site object's domain is
+    used, with 'www.' prefix removed.
+  - =MUACCOUNTS_DEFAULT_DOMAIN= - domain to redirect to when user
+    refers to site with an unknown domain (not registered in any of
+    accounts). When not set, use the current Site object's domain.
+ - =MUACCOUNTS_ACCOUNT_URLCONF= - if set, =request.urlconf= is set to
+    this value when MUAccount's domain is accessed.
+* Models
+  Application defines one model, =MUAccount=.  Model has three fields:
+  - =owner=, OneToOneField reference to
+    =django.contrib.auth.models.User= model, which holds user owning
+    the account;
+  - =members=, ManyToManyField reference to
+    =django.contrib.auth.models.User= model, which holds account
+    members;
+  - =domain=, name of full domain or sub-domain of
+    =MUACCOUNTS_ROOT_DOMAIN=;
+  - =is_subdomain=, decides whether =domain= is full domain or just
+    a subdomain;
+  Class has one class attribute, =subdomain_root=, which contains root
+  for subdomains as in =MUACCOUNTS_ROOT_DOMAIN= setting description,
+  always with leading dot.  This attribute should not be written.
+
+  Class defines one custom permission, =can_set_custom_domain=, which
+  enables setting =is_subdomain= to =True= for the account owner.  If
+  MUAccount owner does not have such permission, checkbox for
+  =is_subdomain= is hidden in account settings form, and on form
+  validation =is_subdomain= is unconditionally set to =True=.
+* Middleware
+  =muaccounts.middleware.MUAccountsMiddleware= looks at
+  =request.META['HTTP_HOST']= and, if it matches any =MUAccount= model
+  instance:
+  - sets =request.muaccount= to that instance (it can be later used by
+    views and, with =request= context processor, in templates);
+  - immediately logs out (and redirects to reverse URL lookup of
+    =muaccounts_not_a_member=) any =auth.models.User= that is not this
+    account's owner or memeber;
+  - if =MUACCOUNTS_ACCOUNT_URLCONF= setting is set, sets
+    =request.urlconf= to its value, allowing single project to display
+    different URL hierarchies for main site and account sites.
+
+    *WARNING*: setting =request.urlconf= doesn't fit well with reverse
+    URL lookups (those will still be made against root urlconf),
+    django-debug-toolbar, and probably other things as well. For
+    maximum reliability, consider running two separate projects on
+    single database: one for "main" site, other for account domains,
+    or use single urlconf for both.
+
+  If current domain doesn't match any of existing MUAccount instances
+  and is not =MUACCOUNT_DEFAULT_DOMAIN=, middleware redirects user to
+  =MUACCOUNT_DEFAULT_DOMAIN=.
+* Views
+  One view, =muaccounts.views.account_detail=, is supplied.  This view
+  displays using =muaccounts/account_detail.html= template and
+  validates =muaccounts.forms.MUAccountForm= form, which enables user
+  to configure account's domain.
+
+  It takes one optional parameter, =return_to=, which can be used to
+  specify URL to redirect user to after successfully changing account
+  domain.  It defaults to reverse of =muaccounts_account_changed=,
+  which, with supplied urlconf, points to
+  =muaccounts/account_changed.html= template.
+* URLs
+  In supplied urlconf, =muaccounts.urls=, two URLs are configured:
+  root for =account_detail= view, and =changed/= for landing page
+  after successfully changing account details, pointing straight to
+  =muaccounts/account_changed.html= template.
+* Templates
+  Application in default setup needs two templates:
+  - =muaccounts/account_detail.html= called by =account_detail= view.
+    Receives two arguments:
+    - =object= - edited MUAccount instance, and
+    - =form= - MUAccountForm instance to display.
+  - =muaccounts/account_changed.html= called after successfully
+    editing account.  Receives no arguments.
+* Example code
+  Example usage and templates are available as =django-saas-kit=
+  project at http://github.com/CrowdSense/django-saas-kit/
+* Bugs and omissions
+  - There is no =setup.py= script for automated installation.
+* License
+  This project is dual-licensed on terms of MIT (MIT-LICENSE.txt) and
+  GPL (GPL-LICENSE.txt) licenses.
