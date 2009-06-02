@@ -10,8 +10,10 @@ from models import MUAccount
 
 
 @login_required
-def account_detail(request, return_to=reverse('muaccounts_account_changed')):
+def account_detail(request, return_to=None):
     account = get_object_or_404(MUAccount, owner=request.user)
+    if return_to is None:
+        return_to = reverse('muaccounts_account_changed')
 
     if request.method == 'POST':
         form = MUAccountForm(request.POST, instance=account)
