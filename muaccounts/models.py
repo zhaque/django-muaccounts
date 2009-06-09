@@ -7,7 +7,8 @@ def _subdomain_root():
     if hasattr(settings,'MUACCOUNTS_ROOT_DOMAIN'):
         root = settings.MUACCOUNTS_ROOT_DOMAIN
     else:
-        root = Site.objects.get_current().domain
+        try: root = Site.objects.get_current().domain
+        except: root = '.nonexistent' # above fails on syncdb
         if root.startswith('www.'):
             root = root[4:]
     if not root.endswith('.'):
