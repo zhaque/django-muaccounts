@@ -7,7 +7,7 @@ from models import MUAccount
 class MUAccountForm(forms.ModelForm):
     class Meta:
         model = MUAccount
-        exclude = ('members',)
+        exclude = ('owner', 'members',)
     _domain_re = re.compile('^[a-z0-9][a-z0-9-.]+[a-z0-9]$')
 
     def _can_set_custom_domain(self):

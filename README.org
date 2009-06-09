@@ -22,8 +22,7 @@ in software-as-a-service projects.
 * Settings
   Following Django settings are read by the application:
   - =MUACCOUNTS_ROOT_DOMAIN= - root domain for subdomains (with or
-    without leading dot). If not set, current Site object's domain is
-    used, with 'www.' prefix removed.
+    without leading dot).  Must be set.
   - =MUACCOUNTS_DEFAULT_DOMAIN= - domain to redirect to when user
     refers to site with an unknown domain (not registered in any of
     accounts). When not set, use the current Site object's domain.
@@ -78,16 +77,19 @@ in software-as-a-service projects.
   and is not =MUACCOUNT_DEFAULT_DOMAIN=, middleware redirects user to
   =MUACCOUNT_DEFAULT_DOMAIN=.
 * Views
-  One view, =muaccounts.views.account_detail=, is supplied.  This view
-  displays using =muaccounts/account_detail.html= template and
-  validates =muaccounts.forms.MUAccountForm= form, which enables user
-  to configure account's domain.
+  - =muaccounts.views.account_detail= - displays using
+    =muaccounts/account_detail.html= template and validates
+    =muaccounts.forms.MUAccountForm= form, which enables user to
+    configure account's domain.
+  - =muaccounts.views.create_account= - if logged in user does not
+    have a MUAccount, creates new one and redirect to =account_detail=
+    view.
 
-  It takes one optional parameter, =return_to=, which can be used to
-  specify URL to redirect user to after successfully changing account
-  domain.  It defaults to reverse of =muaccounts_account_changed=,
-  which, with supplied urlconf, points to
-  =muaccounts/account_changed.html= template.
+  Both views take one optional parameter, =return_to=, which can be
+  used to specify URL to redirect user to after successfully changing
+  account domain.  It defaults to reverse of
+  =muaccounts_account_changed=, which, with supplied urlconf, points
+  to =muaccounts/account_changed.html= template.
 * URLs
   In supplied urlconf, =muaccounts.urls=, two URLs are configured:
   root for =account_detail= view, and =changed/= for landing page

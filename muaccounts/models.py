@@ -4,20 +4,14 @@ from django.contrib.sites.models import Site
 from django.db import models
 
 def _subdomain_root():
-    if hasattr(settings,'MUACCOUNTS_ROOT_DOMAIN'):
-        root = settings.MUACCOUNTS_ROOT_DOMAIN
-    else:
-        try: root = Site.objects.get_current().domain
-        except: root = '.nonexistent' # above fails on syncdb
-        if root.startswith('www.'):
-            root = root[4:]
+    root = settings.MUACCOUNTS_ROOT_DOMAIN
     if not root.startswith('.'):
         root = '.'+root
     return root
 
 class MUAccount(models.Model):
-    owner = models.OneToOneField(User, editable=False)
-    members = models.ManyToManyField(User, related_name='muaccount_member')
+    owner = models.OneToOneField(User)
+    members = models.ManyToManyField(User, related_name='muaccount_member', blank=True)
     domain = models.CharField(max_length=256, unique=True)
     is_subdomain = models.BooleanField(default=True)
 
