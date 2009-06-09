@@ -11,7 +11,7 @@ def _subdomain_root():
         except: root = '.nonexistent' # above fails on syncdb
         if root.startswith('www.'):
             root = root[4:]
-    if not root.startsswith('.'):
+    if not root.startswith('.'):
         root = '.'+root
         return root
 
