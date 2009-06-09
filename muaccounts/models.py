@@ -13,7 +13,7 @@ def _subdomain_root():
             root = root[4:]
     if not root.startswith('.'):
         root = '.'+root
-        return root
+    return root
 
 class MUAccount(models.Model):
     owner = models.OneToOneField(User, editable=False)
