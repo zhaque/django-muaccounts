@@ -25,9 +25,10 @@ class MUAccountsMiddleware:
             if self.urlconf:
                 request.urlconf = self.urlconf
             if request.user.is_authenticated():
-                if request.user<>mua.owner and request.user not in mua.members.all():
-                    logout(request)
-                    return HttpResponseRedirect(reverse('muaccounts_not_a_member', urlconf=self.urlconf))
+                if not mua.is_public:
+                    if request.user<>mua.owner and request.user not in mua.members.all():
+                        logout(request)
+                        return HttpResponseRedirect(reverse('muaccounts_not_a_member', urlconf=self.urlconf))
         except MUAccount.DoesNotExist:
             if host <> self.default:
                 return HttpResponseRedirect('http://%s/'%self.default)

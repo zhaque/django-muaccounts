@@ -14,6 +14,7 @@ class MUAccount(models.Model):
     members = models.ManyToManyField(User, related_name='muaccount_member', blank=True)
     domain = models.CharField(max_length=256, unique=True)
     is_subdomain = models.BooleanField(default=True)
+    is_public = models.BooleanField(default=True)
 
     subdomain_root = _subdomain_root()
 
@@ -29,5 +30,6 @@ class MUAccount(models.Model):
     class Meta:
         permissions = (
             ('can_set_custom_domain', 'Can set custom domain'),
+            ('can_set_public_status', 'Can set public status'),
             )
 

@@ -30,3 +30,8 @@ class MUAccountForm(forms.ModelForm):
         if not self._can_set_custom_domain():
             return True
         return self.cleaned_data['is_subdomain']
+
+    def clean_is_public(self):
+        if self.instance.owner.has_perm('muaccounts.can_set_public_status'):
+            return self.cleaned_data['is_public']
+        return self.instance.is_public

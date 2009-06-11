@@ -65,6 +65,9 @@ def account_detail(request, return_to=None):
          form.fields['is_subdomain'].widget = HiddenInput()
          # no need to change value, will be forced to True when validating.
 
+    if not request.user.has_perm('muaccounts.can_set_public_status'):
+        form.fields['is_public'].widget = HiddenInput()
+
     return direct_to_template(
         request, template='muaccounts/account_detail.html',
         extra_context=dict(object=account, form=form))
