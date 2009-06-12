@@ -2,10 +2,11 @@ from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.cache import patch_vary_headers
 
 from models import MUAccount
+import signals
 
 class MUAccountsMiddleware:
     def __init__(self):
@@ -29,6 +30,9 @@ class MUAccountsMiddleware:
                     if request.user<>mua.owner and request.user not in mua.members.all():
                         logout(request)
                         return HttpResponseRedirect(reverse('muaccounts_not_a_member', urlconf=self.urlconf))
+            for receiver,retval in signals.muaccount_request.send(sender=request, request=request, muaccount=mua):
+                if isinstance(retval, HttpResponse):
+                    return retval
         except MUAccount.DoesNotExist:
             if host <> self.default:
                 return HttpResponseRedirect('http://%s/'%self.default)

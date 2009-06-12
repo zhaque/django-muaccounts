@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db import models
 
+import signals             # so that they get initialized early enough
+
 def _subdomain_root():
     root = settings.MUACCOUNTS_ROOT_DOMAIN
     if not root.startswith('.'):
