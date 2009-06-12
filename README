@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/06/09 21:20:27
+Date: 2009/06/12 15:26:04
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -14,6 +14,7 @@ Table of Contents
 1 Installation
 2 Settings
 3 Models
+    3.1 Permissions
 4 Middleware
 5 Views
 6 URLs
@@ -38,13 +39,21 @@ Table of Contents
 2 Settings
 ~~~~~~~~~~
   Following Django settings are read by the application:
-  - `MUACCOUNTS_ROOT_DOMAIN' - root domain for subdomains (with or
-    without leading dot).  Must be set.
+  - `MUACCOUNTS_ACCOUNT_URLCONF' - if set, `request.urlconf' is set to
+    this value when MUAccount's domain is accessed.
   - `MUACCOUNTS_DEFAULT_DOMAIN' - domain to redirect to when user
     refers to site with an unknown domain (not registered in any of
     accounts). When not set, use the current Site object's domain.
- - `MUACCOUNTS_ACCOUNT_URLCONF' - if set, `request.urlconf' is set to
-    this value when MUAccount's domain is accessed.
+  - `MUACCOUNTS_IP' - if set, value is used to verify custom domains
+    in `MUAccountForm'.  It can be set to a string (literal
+    'aa.bb.cc.dd' value that is compared to `sockets.gethostbyname()'
+    result), or, for more complex deployments, it can be a function
+    that will receive IP as returned by `sockets.gethostbyname()'
+  - `MUACCOUNTS_PORT' - can be set to custom port that will be used in
+    MUAccount site URLs.  This way, developer can successfully use
+    MUAccounts on e.g. 127.0.0.1:8000.
+  - `MUACCOUNTS_ROOT_DOMAIN' - root domain for subdomains (with or
+    without leading dot).  Must be set.
 
 3 Models
 ~~~~~~~~
@@ -57,8 +66,11 @@ Table of Contents
     members;
   - `domain', name of full domain or sub-domain of
     `MUACCOUNTS_ROOT_DOMAIN';
-  - `is_subdomain', decides whether `domain' is full domain or just
-    a subdomain;
+  - `is_subdomain', boolean, decides whether `domain' is full domain
+    or just a subdomain;
+  - `is_public', boolean.  If True (default), MUAccountMiddleware will
+    allow any `auth.User' to log in to MUAccount's account; if False,
+    only users that are MUAccount members will be allowed;
   Class has one class attribute, `subdomain_root', which contains root
   for subdomains as in `MUACCOUNTS_ROOT_DOMAIN' setting description,
   always with leading dot.  This attribute should not be written.
@@ -67,11 +79,14 @@ Table of Contents
   root path of configured domain ([http://domain.root_domain/] if
   `is_subdomain', [http://domain/] otherwise).
 
-  Class defines one custom permission, `can_set_custom_domain', which
-  enables setting `is_subdomain' to `True' for the account owner.  If
-  MUAccount owner does not have such permission, checkbox for
-  `is_subdomain' is hidden in account settings form, and on form
-  validation `is_subdomain' is unconditionally set to `True'.
+3.1 Permissions
+===============
+   - `can_set_custom_domain' enables setting `is_subdomain' to `True'
+     by the account owner.  If MUAccount owner does not have such
+     permission, `account_detaul' view hides checkbox for
+     `is_subdomain', and on form validation `is_subdomain' field is
+     unconditionally set to `True';
+   - `can_set_public_status' does the same for `is_public' field.
 
 4 Middleware
 ~~~~~~~~~~~~
@@ -82,17 +97,23 @@ Table of Contents
     views and, with `request' context processor, in templates);
   - immediately logs out (and redirects to reverse URL lookup of
     `muaccounts_not_a_member') any `auth.models.User' that is not this
-    account's owner or memeber;
+    account's owner or memeber, unless `request.muaccount.is_public'
+    is true;
   - if `MUACCOUNTS_ACCOUNT_URLCONF' setting is set, sets
     `request.urlconf' to its value, allowing single project to display
-    different URL hierarchies for main site and account sites.
+    different URL hierarchies for main site and account sites;
 
     *WARNING*: setting `request.urlconf' doesn't fit well with reverse
     URL lookups (those will still be made against root urlconf),
     django-debug-toolbar, and probably other things as well. For
     maximum reliability, consider running two separate projects on
     single database: one for "main" site, other for account domains,
-    or use single urlconf for both.
+    or use single urlconf for both;
+  - send signal `muaccounts.signals.muaccount_request' and if any
+    receiver returns an instance of `HttpResponse', returns this
+    response instead of actual page.  This can be used for
+    e.g. displaying error message and not allowing to log into expired
+    accounts.
 
   If current domain doesn't match any of existing MUAccount instances
   and is not `MUACCOUNT_DEFAULT_DOMAIN', middleware redirects user to
