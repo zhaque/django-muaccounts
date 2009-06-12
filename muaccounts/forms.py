@@ -1,6 +1,7 @@
-import re
+import re, socket
 
 from django import forms
+from django.conf import settings
 
 from models import MUAccount
 
@@ -35,3 +36,23 @@ class MUAccountForm(forms.ModelForm):
         if self.instance.owner.has_perm('muaccounts.can_set_public_status'):
             return self.cleaned_data['is_public']
         return self.instance.is_public
+
+    def clean(self):
+        if self._can_set_custom_domain() and not self.cleaned_data['is_subdomain']:
+            d = self.cleaned_data.get('domain',None)
+            if d is None: return self.cleaned_data
+            try:
+                ip = socket.gethostbyname(d)
+                if hasattr(settings, 'MUACCOUNTS_IP'):
+                    if callable(settings.MUACCOUNTS_IP):
+                        if not settings.MUACCOUNTS_IP(ip):
+                            self._errors['domain'] = forms.util.ErrorList([
+                                'Domain %s does not resolve to a correct IP number.' % d ])
+                    else:
+                        if ip <> settings.MUACCOUNTS_IP:
+                            self._errors['domain'] = forms.util.ErrorList([
+                                'Domain %s does not resolve to %s.' % (d, settings.MUACCOUNTS_IP) ])
+            except socket.error, msg:
+                self._errors['domain'] = forms.util.ErrorList([
+                    'Cannot resolve domain %s: %s'%(d,msg) ])
+        return self.cleaned_data
