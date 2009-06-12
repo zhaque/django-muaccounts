@@ -24,10 +24,13 @@ class MUAccount(models.Model):
         return self.domain
 
     def get_absolute_url(self):
+        if hasattr(settings, 'MUACCOUNTS_PORT'): port=':%d'%settings.MUACCOUNTS_PORT
+        else: port = ''
+
         if self.is_subdomain:
-            return 'http://%s%s/' % (self.domain, self.subdomain_root)
+            return 'http://%s%s%s/' % (self.domain, self.subdomain_root, port)
         else:
-            return 'http://%s/' % self.domain
+            return 'http://%s%s/' % (self.domain, port)
 
     class Meta:
         permissions = (
