@@ -10,32 +10,50 @@ import signals
 
 class MUAccountsMiddleware:
     def __init__(self):
-        self.default = getattr(settings, 'MUACCOUNTS_DEFAULT_DOMAIN',
-                               Site.objects.get_current().domain)
         self.urlconf = getattr(settings, 'MUACCOUNTS_ACCOUNT_URLCONF', None)
+
+        if hasattr(settings, 'MUACCOUNTS_PORT'):
+            self.port_suffix = ':%d' % settings.MUACCOUNTS_PORT
+        else: self.port_suffix = ''
+
+        self.default_domain = getattr(settings, 'MUACCOUNTS_DEFAULT_DOMAIN',
+                                      Site.objects.get_current().domain)
+        self.default_url = 'http://%s%s/' % ( self.default_domain, self.port_suffix )
 
     def process_request(self, request):
         host = request.META['HTTP_HOST']
+
+        # strip port suffix if present
+        if self.port_suffix and host.endswith(self.port_suffix):
+            host = host[:-len(self.port_suffix)]
+
         try:
             if host.endswith(MUAccount.subdomain_root):
                 mua = MUAccount.objects.get(
                     domain=host[:-len(MUAccount.subdomain_root)], is_subdomain=True)
             else:
                 mua = MUAccount.objects.get(domain=host, is_subdomain=False)
+        except MUAccount.DoesNotExist:
+            if host <> self.default_domain:
+                return HttpResponseRedirect(self.default_url)
+        else:
+            # set up request parameters
             request.muaccount = mua
             if self.urlconf:
                 request.urlconf = self.urlconf
-            if request.user.is_authenticated():
-                if not mua.is_public:
-                    if request.user<>mua.owner and request.user not in mua.members.all():
-                        logout(request)
-                        return HttpResponseRedirect(reverse('muaccounts_not_a_member', urlconf=self.urlconf))
+
+            # force logout of non-member and non-owner from non-public site
+            if request.user.is_authenticated() and not mua.is_public \
+                   and request.user <> mua.owner \
+                   and request.user not in mua.members.all():
+                logout(request)
+                return HttpResponseRedirect(reverse('muaccounts_not_a_member', urlconf=self.urlconf))
+
+            # call request hook
             for receiver,retval in signals.muaccount_request.send(sender=request, request=request, muaccount=mua):
                 if isinstance(retval, HttpResponse):
                     return retval
-        except MUAccount.DoesNotExist:
-            if host <> self.default:
-                return HttpResponseRedirect('http://%s/'%self.default)
+            
 
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):
