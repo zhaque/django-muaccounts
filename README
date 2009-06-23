@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/06/12 15:26:04
+Date: 2009/06/23 16:32:56
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -40,10 +40,19 @@ Table of Contents
 ~~~~~~~~~~
   Following Django settings are read by the application:
   - `MUACCOUNTS_ACCOUNT_URLCONF' - if set, `request.urlconf' is set to
-    this value when MUAccount's domain is accessed.
-  - `MUACCOUNTS_DEFAULT_DOMAIN' - domain to redirect to when user
+    this value when MUAccount's domain is accessed.  This breaks
+    django-debug-toolbar and misleads reverse URL resolver (main
+    urlconf is always used for reverse URL resolving).
+  - `MUACCOUNTS_DEFAULT_DOMAIN' - Default domain name, on which "main"
+    (non-user) site is hosted.  Used to prevent redirection to
+    `MUACCOUNTS_DEFAULT_URL' when `MUAccountsMiddleware' is used both
+    on accounts' sites and main site.  Also used to construct default
+    value of `MUACCOUNTS_DEFAULT_URL' when it is not set.
+  - `MUACCOUNTS_DEFAULT_URL' - URL to redirect to when user agent
     refers to site with an unknown domain (not registered in any of
-    accounts). When not set, use the current Site object's domain.
+    accounts).  When not set, a URL is constructed from
+    `MUACCOUNTS_DEFAULT_DOMAIN' or current Site object's domain and
+    `MUACCOUNTS_PORT'.
   - `MUACCOUNTS_IP' - if set, value is used to verify custom domains
     in `MUAccountForm'.  It can be set to a string (literal
     'aa.bb.cc.dd' value that is compared to `sockets.gethostbyname()'

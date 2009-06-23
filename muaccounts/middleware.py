@@ -16,12 +16,15 @@ class MUAccountsMiddleware:
             self.port_suffix = ':%d' % settings.MUACCOUNTS_PORT
         else: self.port_suffix = ''
 
-        self.default_domain = getattr(settings, 'MUACCOUNTS_DEFAULT_DOMAIN',
-                                      Site.objects.get_current().domain)
-        self.default_url = 'http://%s%s/' % ( self.default_domain, self.port_suffix )
+        self.default_domain = getattr(settings, 'MUACCOUNTS_DEFAULT_DOMAIN', None)
+        self.default_url = getattr(settings, 'MUACCOUNTS_DEFAULT_URL',
+                                   'http://%s%s/' % (
+                                       self.default_domain or Site.objects.get_current().domain,
+                                       self.port_suffix ))
 
     def process_request(self, request):
-        host = request.META['HTTP_HOST']
+        host = request.META.get('HTTP_HOST',None)
+        if host is None: return # Pages CMS middleware does some evil magic in admin interface
 
         # strip port suffix if present
         if self.port_suffix and host.endswith(self.port_suffix):
