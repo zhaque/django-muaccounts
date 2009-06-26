@@ -2,6 +2,7 @@ import re, socket
 
 from django import forms
 from django.conf import settings
+from django.utils.translation import ugettext as _
 
 from models import MUAccount
 
@@ -23,7 +24,7 @@ class MUAccountForm(forms.ModelForm):
                 d = d[:-len(MUAccount.subdomain_root)]
             else:
                 raise forms.ValidationError(
-                    'For subdomain of %s, check the "Is subdomain" field.'
+                    _('For subdomain of %s, check the "Is subdomain" field.')
                     % MUAccount.subdomain_root)
         return d
 
@@ -47,12 +48,12 @@ class MUAccountForm(forms.ModelForm):
                     if callable(settings.MUACCOUNTS_IP):
                         if not settings.MUACCOUNTS_IP(ip):
                             self._errors['domain'] = forms.util.ErrorList([
-                                'Domain %s does not resolve to a correct IP number.' % d ])
+                                _('Domain %s does not resolve to a correct IP number.') % d ])
                     else:
                         if ip <> settings.MUACCOUNTS_IP:
                             self._errors['domain'] = forms.util.ErrorList([
-                                'Domain %s does not resolve to %s.' % (d, settings.MUACCOUNTS_IP) ])
+                                _('Domain %(domain)s does not resolve to %(ip)s.') % {'domain':d, 'ip':settings.MUACCOUNTS_IP} ])
             except socket.error, msg:
                 self._errors['domain'] = forms.util.ErrorList([
-                    'Cannot resolve domain %s: %s'%(d,msg) ])
+                    _('Cannot resolve domain %(domain)s: %(error_string)s')%{'domain':d,'error_string':msg} ])
         return self.cleaned_data
