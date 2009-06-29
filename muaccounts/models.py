@@ -13,11 +13,11 @@ def _subdomain_root():
     return root
 
 class MUAccount(models.Model):
-    owner = models.OneToOneField(User, help_text=_('Owner'))
-    members = models.ManyToManyField(User, related_name='muaccount_member', blank=True, help_text=_('Members'))
-    domain = models.CharField(max_length=256, unique=True, help_text=_('Domain'))
-    is_subdomain = models.BooleanField(default=True, help_text=_('Is subdomain'))
-    is_public = models.BooleanField(default=True, help_text=_('Is public'))
+    owner = models.OneToOneField(User, verbose_name=_('Owner'))
+    members = models.ManyToManyField(User, related_name='muaccount_member', blank=True, verbose_name=_('Members'))
+    domain = models.CharField(max_length=256, unique=True, verbose_name=_('Domain'))
+    is_subdomain = models.BooleanField(default=True, verbose_name=_('Is subdomain'))
+    is_public = models.BooleanField(default=True, verbose_name=_('Is public'))
 
     subdomain_root = _subdomain_root()
 
