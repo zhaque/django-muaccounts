@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-26 19:08+0200\n"
+"POT-Creation-Date: 2009-07-01 22:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,17 +21,21 @@ msgstr ""
 msgid "For subdomain of %s, check the \"Is subdomain\" field."
 msgstr ""
 
-#: forms.py:51
+#: forms.py:46
+msgid "It is not allowed to use this domain name."
+msgstr ""
+
+#: forms.py:56
 #, python-format
 msgid "Domain %s does not resolve to a correct IP number."
 msgstr ""
 
-#: forms.py:55
+#: forms.py:60
 #, python-format
 msgid "Domain %(domain)s does not resolve to %(ip)s."
 msgstr ""
 
-#: forms.py:58
+#: forms.py:63
 #, python-format
 msgid "Cannot resolve domain %(domain)s: %(error_string)s"
 msgstr ""

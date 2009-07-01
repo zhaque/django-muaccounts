@@ -26,7 +26,7 @@ class MUAccountForm(forms.ModelForm):
                 raise forms.ValidationError(
                     _('For subdomain of %s, check the "Is subdomain" field.')
                     % MUAccount.subdomain_root)
-        return d
+        return d.lower()
 
     def clean_is_subdomain(self):
         if not self._can_set_custom_domain():
@@ -39,6 +39,11 @@ class MUAccountForm(forms.ModelForm):
         return self.instance.is_public
 
     def clean(self):
+        if self.cleaned_data['is_subdomain']:
+            for pattern in getattr(settings, 'MUACCOUNTS_SUBDOMAIN_STOPWORDS', ('www',)):
+                if re.search(pattern, self.cleaned_data['domain'], re.I):
+                    self._errors['domain'] = forms.util.ErrorList([
+                        _('It is not allowed to use this domain name.')])
         if self._can_set_custom_domain() and not self.cleaned_data['is_subdomain']:
             d = self.cleaned_data.get('domain',None)
             if d is None: return self.cleaned_data

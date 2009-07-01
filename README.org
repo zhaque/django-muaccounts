@@ -45,6 +45,13 @@ in software-as-a-service projects.
     MUAccounts on e.g. 127.0.0.1:8000.
   - =MUACCOUNTS_ROOT_DOMAIN= - root domain for subdomains (with or
     without leading dot).  Must be set.
+  - =MUACCOUNTS_SUBDOMAIN_STOPWORDS= - tuple of regular expressions
+    (http://docs.python.org/library/re.html) that cannot be used as
+    subdomain names.  Default is =("^www$",)=.  Use this to stop users
+    from e.g. using reserved domain names or using profanities as
+    their domain name.  Expressions are tested using =re.search=, not
+    =re.match=, so without using =^= anchor they can match anywhere in
+    the domain name.
 * Models
   Application defines one model, =MUAccount=.  Model has three fields:
   - =owner=, OneToOneField reference to
