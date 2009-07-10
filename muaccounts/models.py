@@ -15,6 +15,7 @@ def _subdomain_root():
 class MUAccount(models.Model):
     owner = models.OneToOneField(User, verbose_name=_('Owner'))
     members = models.ManyToManyField(User, related_name='muaccount_member', blank=True, verbose_name=_('Members'))
+    name = models.CharField(max_length=256, verbose_name=_('Name'))
     domain = models.CharField(max_length=256, unique=True, verbose_name=_('Domain'))
     is_subdomain = models.BooleanField(default=True, verbose_name=_('Is subdomain'))
     is_public = models.BooleanField(default=True, verbose_name=_('Is public'))
@@ -22,7 +23,7 @@ class MUAccount(models.Model):
     subdomain_root = _subdomain_root()
 
     def __unicode__(self):
-        return self.domain
+        return self.name or self.domain
 
     def get_full_domain(self):
         if self.is_subdomain:
