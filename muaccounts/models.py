@@ -20,6 +20,11 @@ class MUAccount(models.Model):
     is_subdomain = models.BooleanField(default=True, verbose_name=_('Is subdomain'))
     is_public = models.BooleanField(default=True, verbose_name=_('Is public'))
 
+    theme = models.CharField(max_length=64,
+                             default=(getattr(settings, 'MUACCOUNTS_THEMES', [('',)]))[0][0],
+                             choices=getattr(settings, 'MUACCOUNTS_THEMES', []),
+                             verbose_name=_('Theme'))
+
     subdomain_root = _subdomain_root()
 
     def __unicode__(self):

@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/07/01 22:15:01
+Date: 2009/07/10 20:57:13
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -70,6 +70,8 @@ Table of Contents
     their domain name.  Expressions are tested using `re.search', not
     `re.match', so without using `^' anchor they can match anywhere in
     the domain name.
+  - `MUACCOUNTS_THEMES' - a sequence of (codename, name) pairs
+    indicating available themes for user sites.
 
 3 Models
 ~~~~~~~~

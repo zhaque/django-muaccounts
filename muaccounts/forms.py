@@ -6,10 +6,14 @@ from django.utils.translation import ugettext as _
 
 from models import MUAccount
 
+_muaform_exclude = ('owner', 'members',)
+if not getattr(settings, 'MUACCOUNTS_THEMES', None):
+    _muaform_exclude += ('theme',)
+
 class MUAccountForm(forms.ModelForm):
     class Meta:
         model = MUAccount
-        exclude = ('owner', 'members',)
+        exclude = _muaform_exclude
     _domain_re = re.compile('^[a-z0-9][a-z0-9-.]+[a-z0-9]$')
 
     def _can_set_custom_domain(self):

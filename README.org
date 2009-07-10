@@ -52,6 +52,8 @@ in software-as-a-service projects.
     their domain name.  Expressions are tested using =re.search=, not
     =re.match=, so without using =^= anchor they can match anywhere in
     the domain name.
+  - =MUACCOUNTS_THEMES= - a sequence of (codename, name) pairs
+    indicating available themes for user sites.
 * Models
   Application defines one model, =MUAccount=.  Model has three fields:
   - =owner=, OneToOneField reference to
