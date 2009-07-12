@@ -3,7 +3,7 @@ import re
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.forms.widgets import HiddenInput
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.views.generic.simple import direct_to_template
 from django.shortcuts import get_object_or_404
 
@@ -49,7 +49,13 @@ def create_account(request, return_to=None):
 
 @login_required
 def account_detail(request, return_to=None):
+    # We edit current user's MUAccount
     account = get_object_or_404(MUAccount, owner=request.user)
+
+    # but if we're inside a MUAccount, we only allow editing that muaccount.
+    if getattr(request, 'muaccount', account) <> account:
+        return HttpResponseForbidden()
+
     if return_to is None:
         return_to = reverse('muaccounts_account_changed')
 
