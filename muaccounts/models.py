@@ -6,16 +6,22 @@ from django.utils.translation import ugettext_lazy as _
 
 import signals             # so that they get initialized early enough
 
+from model_removable_file import RemovableImageField
+
 def _subdomain_root():
     root = settings.MUACCOUNTS_ROOT_DOMAIN
     if not root.startswith('.'):
         root = '.'+root
     return root
 
+def _muaccount_logo_path(instance, filename):
+    return 'muaccount-logos/%d.jpg' % instance.pk
+
 class MUAccount(models.Model):
     owner = models.OneToOneField(User, verbose_name=_('Owner'))
     members = models.ManyToManyField(User, related_name='muaccount_member', blank=True, verbose_name=_('Members'))
     name = models.CharField(max_length=256, verbose_name=_('Name'))
+    logo = RemovableImageField(upload_to=_muaccount_logo_path, null=True, blank=True)
     domain = models.CharField(max_length=256, unique=True, verbose_name=_('Domain'))
     is_subdomain = models.BooleanField(default=True, verbose_name=_('Is subdomain'))
     is_public = models.BooleanField(default=True, verbose_name=_('Is public'))

@@ -54,7 +54,7 @@ def account_detail(request, return_to=None):
         return_to = reverse('muaccounts_account_changed')
 
     if request.method == 'POST':
-        form = MUAccountForm(request.POST, instance=account)
+        form = MUAccountForm(request.POST, request.FILES, instance=account)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(return_to)
