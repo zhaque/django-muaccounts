@@ -2,6 +2,7 @@ import re, socket
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from models import MUAccount
@@ -66,3 +67,16 @@ class MUAccountForm(forms.ModelForm):
                 self._errors['domain'] = forms.util.ErrorList([
                     _('Cannot resolve domain %(domain)s: %(error_string)s')%{'domain':d,'error_string':msg} ])
         return self.cleaned_data
+
+class AddUserForm(forms.Form):
+    user = forms.CharField(label='User',
+                           help_text='Enter login name or e-mail address',
+                           )
+    def clean_user(self):
+        un = self.cleaned_data['user']
+        try:
+            if '@' in un: u = User.objects.get(email=un)
+            else: u = User.objects.get(username=un)
+        except User.DoesNotExist:
+            raise forms.ValidationError(_('User does not exist.'))
+        return u

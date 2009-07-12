@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.views.generic.simple import direct_to_template
 from django.shortcuts import get_object_or_404
 
-from forms import MUAccountForm
+from forms import MUAccountForm, AddUserForm
 from models import MUAccount
 
 def _domainify(s):
@@ -59,13 +59,20 @@ def account_detail(request, return_to=None):
     if return_to is None:
         return_to = reverse('muaccounts_account_changed')
 
-    if request.method == 'POST':
+    if 'domain' in request.POST:
         form = MUAccountForm(request.POST, request.FILES, instance=account)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(return_to)
     else:
         form = MUAccountForm(instance=account)
+
+    if 'user' in request.POST:
+        uform = AddUserForm(request.POST)
+        if uform.is_valid():
+            account.members.add(uform.cleaned_data['user'])
+            account.save()
+    else:
+        uform = AddUserForm()
 
     if not request.user.has_perm('muaccounts.can_set_custom_domain'):
          form.fields['is_subdomain'].widget = HiddenInput()
@@ -76,4 +83,4 @@ def account_detail(request, return_to=None):
 
     return direct_to_template(
         request, template='muaccounts/account_detail.html',
-        extra_context=dict(object=account, form=form))
+        extra_context=dict(object=account, form=form, add_user_form=uform))
