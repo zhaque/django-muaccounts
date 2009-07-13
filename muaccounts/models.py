@@ -6,7 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 
 import signals             # so that they get initialized early enough
 
-from model_removable_file import RemovableImageField
+from model_fields import RemovableImageField, PickledObjectField
+from themes import DEFAULT_THEME_DICT
 
 def _subdomain_root():
     root = settings.MUACCOUNTS_ROOT_DOMAIN
@@ -25,11 +26,7 @@ class MUAccount(models.Model):
     domain = models.CharField(max_length=256, unique=True, verbose_name=_('Domain'))
     is_subdomain = models.BooleanField(default=True, verbose_name=_('Is subdomain'))
     is_public = models.BooleanField(default=True, verbose_name=_('Is public'))
-
-    theme = models.CharField(max_length=64,
-                             default=(getattr(settings, 'MUACCOUNTS_THEMES', [('',)]))[0][0],
-                             choices=getattr(settings, 'MUACCOUNTS_THEMES', []),
-                             verbose_name=_('Theme'))
+    theme = PickledObjectField(default=(lambda : DEFAULT_THEME_DICT), verbose_name=_('Theme')) # lambda to work around http://code.djangoproject.com/ticket/8633
 
     subdomain_root = _subdomain_root()
 

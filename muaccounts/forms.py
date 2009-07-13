@@ -6,12 +6,14 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
 from models import MUAccount
+from themes import ThemeField
 
 _muaform_exclude = ('owner', 'members',)
 if not getattr(settings, 'MUACCOUNTS_THEMES', None):
     _muaform_exclude += ('theme',)
 
 class MUAccountForm(forms.ModelForm):
+    theme = ('theme' in _muaform_exclude) or ThemeField()
     class Meta:
         model = MUAccount
         exclude = _muaform_exclude
