@@ -32,7 +32,6 @@ class ThemeWidget(forms.MultiWidget):
     def decompress(self, value):
         if value is None: value = {} 
         rv = []
-        print repr(value)
         for codename, name, choices in THEMES:
             rv.append(value.get(codename, choices[0][0]))
         return rv
