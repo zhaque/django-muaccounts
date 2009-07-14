@@ -74,6 +74,12 @@ class AddUserForm(forms.Form):
     user = forms.CharField(label='User',
                            help_text='Enter login name or e-mail address',
                            )
+    def __init__(self, *args, **kwargs):
+        try: self.muaccount = kwargs['muaccount']
+        except KeyError: pass
+        else: del kwargs['muaccount']
+        super(AddUserForm, self).__init__(*args, **kwargs)
+
     def clean_user(self):
         un = self.cleaned_data['user']
         try:
@@ -82,3 +88,12 @@ class AddUserForm(forms.Form):
         except User.DoesNotExist:
             raise forms.ValidationError(_('User does not exist.'))
         return u
+
+    def clean(self):
+        try:
+            limit = self.muaccount.owner.quotas.muaccount_members
+        except AttributeError: pass
+        else:
+            if limit <= len(self.muaccount.members.all()):
+                raise forms.ValidationError(_("Member limit reached."))
+        return self.cleaned_data

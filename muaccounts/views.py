@@ -67,7 +67,7 @@ def account_detail(request, return_to=None):
         form = MUAccountForm(instance=account)
 
     if 'user' in request.POST:
-        uform = AddUserForm(request.POST)
+        uform = AddUserForm(request.POST, muaccount=account)
         if uform.is_valid():
             account.members.add(uform.cleaned_data['user'])
             account.save()
