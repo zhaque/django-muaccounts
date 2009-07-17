@@ -1,6 +1,7 @@
 import re
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.forms.widgets import HiddenInput
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -84,3 +85,19 @@ def account_detail(request, return_to=None):
     return direct_to_template(
         request, template='muaccounts/account_detail.html',
         extra_context=dict(object=account, form=form, add_user_form=uform))
+
+@login_required
+def remove_member(request, user_id):
+    if request.method <> 'POST': return HttpResponseForbidden()
+    # We edit current user's MUAccount
+    account = get_object_or_404(MUAccount, owner=request.user)
+
+    # but if we're inside a MUAccount, we only allow editing that muaccount.
+    if getattr(request, 'muaccount', account) <> account:
+        return HttpResponseForbidden()
+
+    user = get_object_or_404(User, id=user_id)
+    if user in account.members.all():
+        account.members.remove(user)
+
+    return HttpResponseRedirect(reverse('muaccounts_account_detail'))
