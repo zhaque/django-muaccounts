@@ -57,7 +57,7 @@ def account_detail(request, return_to=None):
         return HttpResponseForbidden()
 
     if return_to is None:
-        return_to = reverse('muaccounts_account_changed')
+        return_to = reverse('muaccounts_account_detail')
 
     if 'domain' in request.POST:
         form = MUAccountForm(request.POST, request.FILES, instance=account)
