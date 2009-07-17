@@ -87,6 +87,8 @@ class AddUserForm(forms.Form):
             else: u = User.objects.get(username=un)
         except User.DoesNotExist:
             raise forms.ValidationError(_('User does not exist.'))
+        if u == self.muaccount.owner:
+            raise forms.ValidationError(_('You are already the plan owner.'))
         return u
 
     def clean(self):
