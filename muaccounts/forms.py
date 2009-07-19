@@ -57,12 +57,20 @@ class MUAccountForm(forms.ModelForm):
         model = MUAccount
         exclude = _muaform_exclude
 
-    _domain_re = re.compile('^[a-z0-9][a-z0-9-.]+[a-z0-9]$')
+    def __init__(self, *args, **kwargs):
+        super(MUAccountForm, self).__init__(*args, **kwargs)
+        if not self.instance.owner.has_perm('muaccounts.can_set_custom_domain'):
+            self.fields['domain'].widget = forms.HiddenInput()
+        if not self.instance.owner.has_perm('muaccounts.can_set_public_status'):
+            self.fields['is_public'].widget = forms.HiddenInput()
+        # no need to change values, they'll be forced to True when validating.
+
+    _domain_re = re.compile(r'^[a-z0-9][a-z0-9-]*\.[a-z0-9-.]+[a-z0-9]$')
     def clean_domain(self):
         if not self.instance.owner.has_perm('muaccounts.can_set_custom_domain'):
-            raise forms.ValidationError(_('You cannot set custom domain name.'))
+            return self.instance.domain
 
-        d = self.cleaned_data['domain'].strip()
+        d = self.cleaned_data['domain'].strip().lower()
 
         if not self._domain_re.match(d):
             raise forms.ValidationError('Invalid domain name.')
@@ -86,7 +94,7 @@ class MUAccountForm(forms.ModelForm):
             self._errors['domain'] = forms.util.ErrorList([
                 _('Cannot resolve domain %(domain)s: %(error_string)s')%{'domain':d,'error_string':msg} ])
 
-        return d.lower()
+        return d
 
     def clean_is_public(self):
         if self.instance.owner.has_perm('muaccounts.can_set_public_status'):
