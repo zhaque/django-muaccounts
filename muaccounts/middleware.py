@@ -34,6 +34,8 @@ class MUAccountsMiddleware:
             if host.endswith(MUAccount.subdomain_root):
                 mua = MUAccount.objects.get(
                     subdomain=host[:-len(MUAccount.subdomain_root)])
+                if mua.domain:
+                    return HttpResponseRedirect(mua.get_absolute_url())
             else:
                 mua = MUAccount.objects.get(domain=host)
         except MUAccount.DoesNotExist:
