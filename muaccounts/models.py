@@ -4,7 +4,7 @@ from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-import signals             # so that they get initialized early enough
+import signals
 
 from model_fields import RemovableImageField, PickledObjectField
 from themes import DEFAULT_THEME_DICT
@@ -48,3 +48,10 @@ class MUAccount(models.Model):
         else: port = ''
         return 'http://%s%s/' % (self.get_full_domain(), port)
 
+    def add_member(self, user):
+        self.members.add(user)
+        signals.add_member.send(self, user=user)
+
+    def remove_member(self, user):
+        self.members.remove(user)
+        signals.remove_member.send(self, user=user)

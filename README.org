@@ -69,7 +69,7 @@ in software-as-a-service projects.
     user;
   - =subdomain=, a sub-domain of =MUACCOUNTS_ROOT_DOMAIN=, not
     editable by user;
- - =is_public=, boolean.  If True (default), MUAccountMiddleware will
+  - =is_public=, boolean.  If True (default), MUAccountMiddleware will
     allow any =auth.User= to log in to MUAccount's account; if False,
     only users that are MUAccount members will be allowed;
   Class has one class attribute, =subdomain_root=, which contains root
@@ -79,6 +79,12 @@ in software-as-a-service projects.
   Model defines =get_absolute_url()= method, which returns link to
   root path of configured domain (http://domain.root_domain/ if
   =is_subdomain=, http://domain/ otherwise).
+
+  Two methods are defined, =add_member(user)= and
+  =remove_member(user)= to respectively add or remove =user= from
+  =members= and send out =muaccounts.signals.add_member= or
+  =muaccounts.signals.remove_member= with additional =user=
+  parameter.
 ** Permissions
    - =can_set_custom_domain= enables setting =is_subdomain= to =True=
      by the account owner.  If MUAccount owner does not have such

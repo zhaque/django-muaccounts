@@ -72,8 +72,7 @@ def account_detail(request, return_to=None):
     if 'user' in request.POST:
         uform = AddUserForm(request.POST, muaccount=account)
         if uform.is_valid():
-            account.members.add(uform.cleaned_data['user'])
-            account.save()
+            account.add_member(uform.cleaned_data['user'])
             return HttpResponseRedirect(return_to)
     else:
         uform = AddUserForm()
@@ -94,6 +93,6 @@ def remove_member(request, user_id):
 
     user = get_object_or_404(User, id=user_id)
     if user in account.members.all():
-        account.members.remove(user)
+        account.remove_member(user)
 
     return HttpResponseRedirect(reverse('muaccounts_account_detail'))
