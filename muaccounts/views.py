@@ -50,7 +50,7 @@ def create_account(request):
     return direct_to_template(request, 'muaccounts/create_account.html', {'form':form})
 
 @login_required
-def account_detail(request):
+def account_detail(request, return_to=None):
     # We edit current user's MUAccount
     account = get_object_or_404(MUAccount, owner=request.user)
 
@@ -58,10 +58,14 @@ def account_detail(request):
     if getattr(request, 'muaccount', account) <> account:
         return HttpResponseForbidden()
 
+    if return_to is None:
+        return_to = reverse('muaccounts.views.account_detail')
+
     if 'domain' in request.POST:
         form = MUAccountForm(request.POST, request.FILES, instance=account)
         if form.is_valid():
             form.save()
+            return HttpResponseRedirect(return_to)
     else:
         form = MUAccountForm(instance=account)
 
@@ -70,6 +74,7 @@ def account_detail(request):
         if uform.is_valid():
             account.members.add(uform.cleaned_data['user'])
             account.save()
+            return HttpResponseRedirect(return_to)
     else:
         uform = AddUserForm()
 
