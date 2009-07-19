@@ -30,6 +30,12 @@ class MUAccount(models.Model):
 
     subdomain_root = _subdomain_root()
 
+    class Meta:
+        permissions = (
+            ('can_set_custom_domain', 'Can set custom domain'),
+            ('can_set_public_status', 'Can set public status'),
+            )
+
     def __unicode__(self):
         return self.name or self.domain or self.subdomain+self.subdomain_root
 
@@ -41,10 +47,4 @@ class MUAccount(models.Model):
         if hasattr(settings, 'MUACCOUNTS_PORT'): port=':%d'%settings.MUACCOUNTS_PORT
         else: port = ''
         return 'http://%s%s/' % (self.get_full_domain(), port)
-
-    class Meta:
-        permissions = (
-            ('can_set_custom_domain', 'Can set custom domain'),
-            ('can_set_public_status', 'Can set public status'),
-            )
 
