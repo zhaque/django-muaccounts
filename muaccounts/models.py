@@ -23,8 +23,8 @@ class MUAccount(models.Model):
     members = models.ManyToManyField(User, related_name='muaccount_member', blank=True, verbose_name=_('Members'))
     name = models.CharField(max_length=256, verbose_name=_('Name'))
     logo = RemovableImageField(upload_to=_muaccount_logo_path, null=True, blank=True)
-    domain = models.CharField(max_length=256, unique=True, verbose_name=_('Domain'))
-    is_subdomain = models.BooleanField(default=True, verbose_name=_('Is subdomain'))
+    domain = models.CharField(max_length=256, unique=True, verbose_name=_('Domain'), blank=True, null=True)
+    subdomain = models.CharField(max_length=256, unique=True, verbose_name=_('Subdomain'), null=True)
     is_public = models.BooleanField(default=True, verbose_name=_('Is public'))
     theme = PickledObjectField(default=(lambda : DEFAULT_THEME_DICT), verbose_name=_('Theme')) # lambda to work around http://code.djangoproject.com/ticket/8633
 
@@ -34,8 +34,7 @@ class MUAccount(models.Model):
         return self.name or self.domain
 
     def get_full_domain(self):
-        if self.is_subdomain:
-            return self.domain+self.subdomain_root
+        return self.domain or self.subdomain+self.subdomain_root
         return self.domain
 
     def get_absolute_url(self):

@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/07/17 19:37:07
+Date: 2009/07/19 20:09:42
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -72,6 +72,9 @@ Table of Contents
     the domain name.
   - `MUACCOUNTS_THEMES' - a sequence of (codename, name) pairs
     indicating available themes for user sites.
+  - `MUACCOUNTS_USE_SSO' - use django-sso when redirecting user to
+    newly created site.  Default is True if django-sso is available,
+    False otherwise.
 
 3 Models
 ~~~~~~~~
@@ -82,11 +85,11 @@ Table of Contents
   - `members', ManyToManyField reference to
     `django.contrib.auth.models.User' model, which holds account
     members;
-  - `domain', name of full domain or sub-domain of
-    `MUACCOUNTS_ROOT_DOMAIN';
-  - `is_subdomain', boolean, decides whether `domain' is full domain
-    or just a subdomain;
-  - `is_public', boolean.  If True (default), MUAccountMiddleware will
+  - `domain', name of custom full domain for the site, changeable by
+    user;
+  - `subdomain', a sub-domain of `MUACCOUNTS_ROOT_DOMAIN', not
+    editable by user;
+ - `is_public', boolean.  If True (default), MUAccountMiddleware will
     allow any `auth.User' to log in to MUAccount's account; if False,
     only users that are MUAccount members will be allowed;
   Class has one class attribute, `subdomain_root', which contains root
@@ -142,21 +145,24 @@ Table of Contents
   - `muaccounts.views.account_detail' - displays using
     `muaccounts/account_detail.html' template and validates
     `muaccounts.forms.MUAccountForm' form, which enables user to
-    configure account's domain.
+    configure account's domain. 
   - `muaccounts.views.create_account' - if logged in user does not
-    have a MUAccount, creates new one and redirect to `account_detail'
-    view.
-
-  Both views take one optional parameter, `return_to', which can be
-  used to specify URL to redirect user to after successfully changing
-  account domain.  It defaults to reverse of
-  `muaccounts_account_detail'.
+    have a MUAccount, displays a form to create a new one or accepts
+    results of this form.  After accepting form and creating new
+    account, redirects user to that account, using django-sso if
+    available.
 
 6 URLs
 ~~~~~~
   In supplied urlconf, `muaccounts.urls', one external URL is
   configured: root for `account_detail' view.  More URLs are
-  configured for various POST actions.
+  configured for various POST actions.  This is intended to be
+  included in the subdomain sites' urlconf.
+
+  In main site a link to create account form should be used.  Account
+  is created by view `muaccounts.views.create_account'.  Sample
+  urlconf line is:
+   (r'^accounts/create-site/$', 'muaccounts.views.create_account'),
 
 7 Templates
 ~~~~~~~~~~~
@@ -165,6 +171,9 @@ Table of Contents
     Receives two arguments:
     - `object' - edited MUAccount instance, and
     - `form' - MUAccountForm instance to display.
+  - `muaccounts/create_account.html' called by `create_account' view.
+    Receives one argument, `form', holding an instance of
+    MUAccountCreateForm.
 
 8 Example code
 ~~~~~~~~~~~~~~
