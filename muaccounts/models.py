@@ -31,7 +31,7 @@ class MUAccount(models.Model):
     subdomain_root = _subdomain_root()
 
     def __unicode__(self):
-        return self.name or self.domain
+        return self.name or self.domain or self.subdomain+self.subdomain_root
 
     def get_full_domain(self):
         return self.domain or self.subdomain+self.subdomain_root
