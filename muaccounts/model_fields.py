@@ -141,3 +141,9 @@ class PickledObjectField(models.Field):
 			return super(PickledObjectField, self).get_db_prep_lookup(lookup_type, value)
 		else:
 			raise TypeError('Lookup type %s is not supported.' % lookup_type)
+
+# fix for http://www.djangosnippets.org/snippets/513/#c620
+# from comment http://www.djangosnippets.org/snippets/513/#c1664
+try: import psycopg2.extensions
+except ImportError: pass
+else: psycopg2.extensions.register_adapter(PickledObject, psycopg2.extensions.QuotedString)
