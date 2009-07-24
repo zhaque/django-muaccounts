@@ -83,7 +83,7 @@ class Migration:
             'name': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
             'owner': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
             'subdomain': ('django.db.models.fields.CharField', [], {'max_length': '256', 'unique': 'True', 'null': 'True'}),
-            'theme': ('PickledObjectField', [], {'default': '( lambda :DEFAULT_THEME_DICT)'})
+            'theme': ('PickledObjectField', [], {})
         }
     }
     
