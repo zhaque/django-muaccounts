@@ -22,7 +22,7 @@ def _muaccount_logo_path(instance, filename):
     return 'muaccount-logos/%d.jpg' % instance.pk
 
 class MUAccount(models.Model):
-    owner = models.OneToOneField(User, verbose_name=_('Owner'))
+    owner = models.OneToOneField(User, verbose_name=_('Owner'), blank=True, null=True)
     members = models.ManyToManyField(User, related_name='muaccount_member', blank=True, verbose_name=_('Members'))
     name = models.CharField(max_length=256, verbose_name=_('Name'))
     logo = RemovableImageField(upload_to=_muaccount_logo_path, null=True, blank=True)
