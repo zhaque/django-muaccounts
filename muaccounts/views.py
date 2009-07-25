@@ -16,11 +16,11 @@ try: import sso
 except ImportError: USE_SSO = False
 else: USE_SSO = getattr(settings, 'MUACCOUNTS_USE_SSO', True)
 def redirect_to_muaccount(mua):
+    url = mua.get_absolute_url('muaccounts_account_detail')
     if USE_SSO:
-        return HttpResponseRedirect(
-            reverse('sso')+'?next='+mua.get_absolute_url())
+        return HttpResponseRedirect(reverse('sso')+'?next='+url)
     else:
-        return HttpResponseRedirect(mua.get_absolute_url())
+        return HttpResponseRedirect(url)
 
 @login_required
 def create_account(request):
