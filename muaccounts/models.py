@@ -1,6 +1,9 @@
+import warnings
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -43,10 +46,18 @@ class MUAccount(models.Model):
         return self.domain or self.subdomain+self.subdomain_root
         return self.domain
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, path='/', args=(), kwargs={}):
         if hasattr(settings, 'MUACCOUNTS_PORT'): port=':%d'%settings.MUACCOUNTS_PORT
         else: port = ''
-        return 'http://%s%s/' % (self.get_full_domain(), port)
+        if not path.startswith('/'):
+            if hasattr(settings, 'MUACCOUNTS_USERSITE_URLCONF'):
+                path = reverse(path, args=args, kwargs=kwargs,
+                               urlconf=settings.MUACCOUNTS_USERSITE_URLCONF)
+            else:
+                warnings.warn(
+                    'Cannot resolve without settings.MUACCOUNTS_USERSITE_URLCONF, using / path.')
+                path = '/'
+        return 'http://%s%s%s' % (self.get_full_domain(), port, path)
 
     def add_member(self, user):
         self.members.add(user)

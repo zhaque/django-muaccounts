@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/07/19 22:40:36
+Date: 2009/07/25 03:02:30
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -75,6 +75,9 @@ Table of Contents
   - `MUACCOUNTS_USE_SSO' - use django-sso when redirecting user to
     newly created site.  Default is True if django-sso is available,
     False otherwise.
+  - `MUACCOUNTS_USERSITE_URLCONF' - name of URLconf module for user
+    sites.  This is used by MUAccount instances' get_absolute_url()
+    method.
 
 3 Models
 ~~~~~~~~
@@ -96,9 +99,12 @@ Table of Contents
   for subdomains as in `MUACCOUNTS_ROOT_DOMAIN' setting description,
   always with leading dot.  This attribute should not be written.
 
-  Model defines `get_absolute_url()' method, which returns link to
-  root path of configured domain ([http://domain.root_domain/] if
-  `is_subdomain', [http://domain/] otherwise).
+  Model defines `get_absolute_url(path = '/', args = (), kwargs = {})'
+  method, which returns link to configured domain
+  ([http://subdomain.root_domain/path] if `domain' is None,
+  [http://domain/path] otherwise).  Optional path can be either an
+  absolute path or, if `settings.MUACCOUNTS_USERSITE_URLCONF' is set,
+  a name, args and kwargs for reverse URL lookup.
 
   Two methods are defined, `add_member(user)' and
   `remove_member(user)' to respectively add or remove `user' from
