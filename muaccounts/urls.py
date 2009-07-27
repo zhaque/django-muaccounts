@@ -6,4 +6,5 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('',
     (r'^$', 'muaccounts.views.account_detail', {}, 'muaccounts_account_detail'),
     (r'^remove_member/(?P<user_id>\d+)/$', 'muaccounts.views.remove_member', {}, 'muaccounts_remove_member'),
+    (r'^claim/$', 'muaccounts.views.claim_account', {}, 'muaccounts_claim_account'),
     )

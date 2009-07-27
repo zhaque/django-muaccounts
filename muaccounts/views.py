@@ -3,11 +3,14 @@ import re
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.core.mail import mail_managers
 from django.core.urlresolvers import reverse
 from django.forms.widgets import HiddenInput
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.views.generic.simple import direct_to_template
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 
 from forms import MUAccountCreateForm, MUAccountForm, AddUserForm
 from models import MUAccount
@@ -21,6 +24,25 @@ def redirect_to_muaccount(mua):
         return HttpResponseRedirect(reverse('sso')+'?next='+url)
     else:
         return HttpResponseRedirect(url)
+
+@login_required
+def claim_account(request):
+    mua = request.muaccount
+    if mua.owner is not None or request.method <> 'POST':
+        return HttpResponseForbidden()
+
+    context = {
+        'user': request.user,
+        'muaccount': request.muaccount,
+        'site': Site.objects.get_current(),
+        }
+
+    subject = render_to_string('muaccounts/claim_account_subject.txt', context)
+    subject = ''.join(subject.splitlines()) # must not contain newlines
+    message = render_to_string('muaccounts/claim_account_email.txt', context)
+    mail_managers(subject, message)
+
+    return direct_to_template(request, 'muaccounts/claim_sent.html')
 
 @login_required
 def create_account(request):
