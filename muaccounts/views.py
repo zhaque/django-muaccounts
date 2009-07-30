@@ -72,7 +72,7 @@ def create_account(request):
     return direct_to_template(request, 'muaccounts/create_account.html', {'form':form})
 
 @login_required
-def account_detail(request, return_to=None):
+def account_detail(request, return_to=None, extra_context={}):
     # We edit current user's MUAccount
     account = get_object_or_404(MUAccount, owner=request.user)
 
@@ -99,9 +99,12 @@ def account_detail(request, return_to=None):
     else:
         uform = AddUserForm()
 
+    ctx = dict(object=account, form=form, add_user_form=uform)
+    ctx.update(extra_context)
+
     return direct_to_template(
         request, template='muaccounts/account_detail.html',
-        extra_context=dict(object=account, form=form, add_user_form=uform))
+        extra_context=ctx)
 
 @login_required
 def remove_member(request, user_id):
