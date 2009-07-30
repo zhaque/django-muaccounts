@@ -2,7 +2,7 @@
                            ==========================
 
 Author: Maciej Pasternacki <maciej@pasternacki.net>
-Date: 2009/07/25 03:02:30
+Date: 2009/07/27 16:45:01
 
 
 Django-muaccounts is an application for multi-user accounts within
@@ -154,15 +154,28 @@ Table of Contents
 
 5 Views
 ~~~~~~~
-  - `muaccounts.views.account_detail' - displays using
-    `muaccounts/account_detail.html' template and validates
-    `muaccounts.forms.MUAccountForm' form, which enables user to
-    configure account's domain. 
   - `muaccounts.views.create_account' - if logged in user does not
     have a MUAccount, displays a form to create a new one or accepts
     results of this form.  After accepting form and creating new
     account, redirects user to that account, using django-sso if
-    available.
+    available.  It is not configured in default `urls.py' and should
+    be added directly in main site's urlconf.
+  - `muaccounts.views.account_detail' - displays using
+    `muaccounts/account_detail.html' template and validates
+    `muaccounts.forms.MUAccountForm' form, which enables user to
+    configure account's domain.  In supplied `urls.py' this view is
+    named `muaccounts_account_detail'.
+  - `muaccounts.views.claim_account' - if `muaccount.owner' is NULL,
+    logged in user can "claim" the account, i.e. click a button
+    directing to this view, which will send an e-mail to
+    `settings.MANAGERS'.  This view should be called with a POST
+    request.  In default `urls.py' this view is named
+    `muaccounts_claim_account'.
+  - `muaccounts.views.remove_member' - for MUAccount_owner, with
+    `user_id' parameter set, this post will remove user with supplied
+    ID from the member list.  This view should be called with a POST
+    request.  In default `urls.py' this view is called
+    `muaccounts.views.remove_member'.
 
 6 URLs
 ~~~~~~
@@ -186,6 +199,13 @@ Table of Contents
   - `muaccounts/create_account.html' called by `create_account' view.
     Receives one argument, `form', holding an instance of
     MUAccountCreateForm.
+  - `muaccounts/claim_account_subject.txt' and
+    `muaccounts/claim_account_email.txt' - these templates are used by
+    `claim_account' view to create an e-mail to MANAGERS.  This
+    templates receive three arguments:
+    - `user' - user that is sending the claim,
+    - `muaccount' - an account that is claimed,
+    - `site' - `sites.Site' object for current site.
 
 8 Example code
 ~~~~~~~~~~~~~~
